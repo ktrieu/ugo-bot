@@ -10,7 +10,7 @@ GENERAL_CHANNEL_ID = '822531930384891948'
 # Hardcode this, since client.user is not supported in this version
 BOT_USER_ID = 985926656684343356
 
-MESSAGE = 'UGO-BOT TEST: ALL EMPLOYEES IGNORE'
+PING_MESSAGE = '@everyone:\nUGO-BOT SCRUMMONS: React if you are available for scrum!'
 
 EMOTES = {'🍆': 'Eitan', '❓': 'Kevin', '🛏️': 'Justin', '🙆🏻‍♀️': 'Bobby', '💩': 'Lily', '🍠': 'Hanyuan'}
 
@@ -23,7 +23,7 @@ async def get_gen_chan(client: discord.Client) -> discord.TextChannel:
 
 async def cmd_ping(client: discord.Client):
     gen_chan = await get_gen_chan(client)
-    message: discord.Message = await gen_chan.send(MESSAGE)
+    message: discord.Message = await gen_chan.send(PING_MESSAGE)
 
     for emote in EMOTES.keys():
         await message.add_reaction(emote)
@@ -31,15 +31,17 @@ async def cmd_ping(client: discord.Client):
     await client.close()
 
 async def get_last_ping_msg(chan: discord.TextChannel) -> discord.Message:
-     async for m in chan.history():
-        if m.author.id == BOT_USER_ID and m.content == MESSAGE:
+    async for m in chan.history():
+        if m.author.id == BOT_USER_ID and m.content == PING_MESSAGE:
             return m
+
+    raise RuntimeError('Could not find last ping message!')
 
 def compose_check_message(not_present):
     num_avail = len(EMOTES) - len(not_present)
     not_present_lines = '\n'.join(not_present)
 
-    return f'{num_avail}/{len(EMOTES)} available for scrum.\n\nNot available:\n{not_present_lines}'
+    return f'{num_avail}/{len(EMOTES)} available for scrum. Not available:\n{not_present_lines}'
 
 async def cmd_check(client: discord.Client):
     gen_chan = await get_gen_chan(client)
